@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player de Vídeo Personalizado</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #181818;
+            margin: 0;
+        }
+
+        .player-container {
+            position: relative;
+            width: 640px;
+            max-width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        video {
+            width: 100%;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            transition: opacity 0.3s;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+
+        .btn:hover {
+            color: #ffcc00;
+        }
+
+        .progress-container {
+            flex-grow: 1;
+            height: 5px;
+            background: #555;
+            border-radius: 5px;
+            margin: 0 10px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 5px;
+            width: 0%;
+            background: #ffcc00;
+            border-radius: 5px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .time {
+            color: white;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="player-container">
+        <video id="video" src="http://vods.conexao-vs.live:80/series/221460.mp4" onclick="toggleControls()"></video>
+        <div class="controls" id="controls">
+            <button class="btn" onclick="togglePlay()">
+                <i id="playIcon" class="material-icons">play_arrow</i>
+            </button>
+            <span class="time" id="currentTime">0:00</span>
+            <div class="progress-container" id="progressContainer" onclick="seek(event)">
+                <div class="progress-bar"></div>
+            </div>
+            <span class="time" id="duration">0:00</span>
+            <button class="btn" onclick="toggleMute()">
+                <i id="muteIcon" class="material-icons">volume_up</i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById("video");
+        const controls = document.getElementById("controls");
+        const playIcon = document.getElementById("playIcon");
+        const muteIcon = document.getElementById("muteIcon");
+        const progressBar = document.querySelector(".progress-bar");
+        const progressContainer = document.getElementById("progressContainer");
+        const currentTimeDisplay = document.getElementById("currentTime");
+        const durationDisplay = document.getElementById("duration");
+
+        function togglePlay() {
+            if (video.paused) {
+                video.play();
+                playIcon.textContent = "pause";
+            } else {
+                video.pause();
+                playIcon.textContent = "play_arrow";
+            }
+        }
+
+        function toggleMute() {
+            video.muted = !video.muted;
+            muteIcon.textContent = video.muted ? "volume_off" : "volume_up";
+        }
+
+        function toggleControls() {
+            controls.classList.toggle("hidden");
+        }
+
+        video.addEventListener("timeupdate", () => {
+            const percent = (video.currentTime / video.duration) * 100;
+            progressBar.style.width = percent + "%";
+            currentTimeDisplay.textContent = formatTime(video.currentTime);
+        });
+
+        video.addEventListener("loadedmetadata", () => {
+            durationDisplay.textContent = formatTime(video.duration);
+        });
+
+        function seek(event) {
+            const clickX = event.offsetX;
+            const width = progressContainer.clientWidth;
+            const duration = video.duration;
+            video.currentTime = (clickX / width) * duration;
+        }
+
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+    </script>
+
+</body>
+</html>
